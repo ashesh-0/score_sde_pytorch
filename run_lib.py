@@ -36,6 +36,7 @@ import likelihood
 import losses
 import sampling
 import sde_lib
+from base_noisy_data import GaussianNoisyData
 # Keep the import below for registering all model definitions
 from models import ddpm, ncsnpp, ncsnv2
 from models import utils as mutils
@@ -80,8 +81,12 @@ def train(config, workdir):
 
     # Build data iterators
     train_ds, eval_ds, _ = datasets.get_dataset(config, uniform_dequantization=config.data.uniform_dequantization)
-    train_iter = iter(train_ds)  # pytype: disable=wrong-arg-types
-    eval_iter = iter(eval_ds)  # pytype: disable=wrong-arg-types
+    # NOTE: Here, iterator is replaced by its noisy version.
+    train_iter = GaussianNoisyData(iter(train_ds), config.data.base_noise_std)
+    eval_iter = GaussianNoisyData(iter(eval_ds), config.data.base_noise_std)
+    # train_iter = iter(train_ds)  # pytype: disable=wrong-arg-types
+    # eval_iter = iter(eval_ds)  # pytype: disable=wrong-arg-types
+
     # Create data normalizer and its inverse
     scaler = datasets.get_data_scaler(config)
     inverse_scaler = datasets.get_data_inverse_scaler(config)

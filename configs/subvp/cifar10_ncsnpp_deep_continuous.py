@@ -37,7 +37,6 @@ def get_config():
     # data
     data = config.data
     data.centered = True
-    data.base_noise_std = 20
 
     # model
     model = config.model

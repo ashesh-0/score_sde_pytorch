@@ -37,7 +37,7 @@ def get_config():
     # data
     data = config.data
     data.centered = True
-    data.base_noise_std = 20
+    data.base_noise_std = 25
 
     # model
     model = config.model
@@ -53,4 +53,12 @@ def get_config():
     model.resamp_with_conv = True
     model.conditional = True
 
+    # Evaluate
+    eval = config.eval
+    eval.begin_ckpt = 1
+    eval.end_ckpt = 1
+    eval.denoising_samples = False
+    eval.enable_sampling = True
+    eval.batch_size = 128
+    eval.num_samples = 256
     return config

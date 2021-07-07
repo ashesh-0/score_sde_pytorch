@@ -338,6 +338,16 @@ def evaluate(config, workdir, eval_folder="eval"):
                         np.savez_compressed(io_buffer, bpd)
                         fout.write(io_buffer.getvalue())
 
+        # if config.eval.denoising_samples:
+        #     num_sampling_rounds = config.eval.num_samples // config.eval.batch_size + 1
+        #     for r in range(num_sampling_rounds):
+        #         logging.info("sampling -- ckpt: %d, round: %d" % (ckpt, r))
+
+        #         # Directory to save samples. Different for each host to avoid writing conflicts
+        #         this_sample_dir = os.path.join(eval_dir, f"ckpt_{ckpt}")
+        #         tf.io.gfile.makedirs(this_sample_dir)
+        #         samples, n = sampling_fn(score_model)
+
         # Generate samples and compute IS/FID/KID when enabled
         if config.eval.enable_sampling:
             num_sampling_rounds = config.eval.num_samples // config.eval.batch_size + 1

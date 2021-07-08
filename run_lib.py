@@ -36,7 +36,6 @@ import likelihood
 import losses
 import sampling
 import sde_lib
-from base_noisy_data import GaussianNoisyData
 # Keep the import below for registering all model definitions
 from models import ddpm, ncsnpp, ncsnv2
 from models import utils as mutils
@@ -82,8 +81,8 @@ def train(config, workdir):
     # Build data iterators
     train_ds, eval_ds, _ = datasets.get_dataset(config, uniform_dequantization=config.data.uniform_dequantization)
     # NOTE: Here, iterator is replaced by its noisy version.
-    train_iter = GaussianNoisyData(iter(train_ds), config.data.get('base_noise_std', 0))
-    eval_iter = GaussianNoisyData(iter(eval_ds), config.data.get('base_noise_std', 0))
+    train_iter = iter(train_ds)
+    eval_iter = iter(eval_ds)
 
     # Create data normalizer and its inverse
     scaler = datasets.get_data_scaler(config)
@@ -137,7 +136,7 @@ def train(config, workdir):
 
     for step in range(initial_step, num_train_steps + 1):
         # Convert data to JAX arrays and normalize them. Use ._numpy() to avoid copy.
-        batch = torch.from_numpy(next(train_iter)['image']).to(config.device).float()
+        batch = torch.from_numpy(next(train_iter)['image']._numpy()).to(config.device).float()
         batch = batch.permute(0, 3, 1, 2)
         batch = scaler(batch)
         # Execute one training step
@@ -152,7 +151,7 @@ def train(config, workdir):
 
         # Report the loss on an evaluation dataset periodically
         if step % config.training.eval_freq == 0:
-            eval_batch = torch.from_numpy(next(eval_iter)['image']).to(config.device).float()
+            eval_batch = torch.from_numpy(next(eval_iter)['image']._numpy()).to(config.device).float()
             eval_batch = eval_batch.permute(0, 3, 1, 2)
             eval_batch = scaler(eval_batch)
             eval_loss = eval_step_fn(state, eval_batch)

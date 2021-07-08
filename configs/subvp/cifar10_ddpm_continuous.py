@@ -27,7 +27,7 @@ def get_config():
     training.sde = 'subvpsde'
     training.continuous = True
     training.reduce_mean = True
-
+    # training.batch_size = 32
     # sampling
     sampling = config.sampling
     sampling.method = 'pc'

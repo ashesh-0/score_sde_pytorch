@@ -165,7 +165,7 @@ class VPSDE(SDE):
 
 
 class subVPSDE(SDE):
-    def __init__(self, beta_min=0.1, beta_max=20, N=1000):
+    def __init__(self, beta_min=0.1, beta_max=20, N=1000, start_t=None):
         """Construct the sub-VP SDE that excels at likelihoods.
 
     Args:
@@ -176,8 +176,9 @@ class subVPSDE(SDE):
         super().__init__(N)
         self.beta_0 = beta_min
         self.beta_1 = beta_max
-
+        self.start_t = start_t
         self.N = N
+        print(f'[{self.__class__.__name__}] Start_T:{self.start_t}')
 
     @property
     def T(self):

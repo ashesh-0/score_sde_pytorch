@@ -95,7 +95,8 @@ def train(config, workdir):
     elif config.training.sde.lower() == 'subvpsde':
         sde = sde_lib.subVPSDE(beta_min=config.model.beta_min,
                                beta_max=config.model.beta_max,
-                               N=config.model.num_scales)
+                               N=config.model.num_scales,
+                               start_t=config.training.start_t)
         sampling_eps = 1e-3
     elif config.training.sde.lower() == 'vesde':
         sde = sde_lib.VESDE(sigma_min=config.model.sigma_min,

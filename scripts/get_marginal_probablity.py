@@ -8,7 +8,7 @@ from base_noisy_data import GaussianNoisyData
 from configs.subvp.cifar10_ddpm_continuous import get_config
 
 
-def get_imgs(t):
+def get_noisy_imgs(t):
 
     config = get_config()
     train_ds, eval_ds, _ = datasets.get_dataset(config, uniform_dequantization=config.data.uniform_dequantization)
@@ -18,8 +18,11 @@ def get_imgs(t):
     batch = torch.from_numpy(next(iter(train_ds))['image']._numpy()).to(config.device).float()
     batch = batch.permute(0, 3, 1, 2)
     batch = scaler(batch)
-
     sde = sde_lib.subVPSDE(beta_min=config.model.beta_min, beta_max=config.model.beta_max, N=config.model.num_scales)
+    return get_noisy_imgs_from_batch(t, batch, sde, inverse_scaler)
+
+
+def get_noisy_imgs_from_batch(t, batch, sde, inverse_scaler):
     t = torch.ones(batch.shape[0], device=batch.device) * t
     mean, std = sde.marginal_prob(batch, t)
 
@@ -32,7 +35,7 @@ def get_imgs(t):
 
 if __name__ == '__main__':
     t = 0.1
-    data = get_imgs(t)
+    data = get_noisy_imgs(t)
     fpath = f'/home/ashesh/ashesh/forward_sde_samples_t-{t}.npy'
 
     with open(fpath, 'wb') as f:

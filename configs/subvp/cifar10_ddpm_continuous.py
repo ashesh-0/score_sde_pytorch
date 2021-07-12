@@ -31,7 +31,7 @@ def get_config():
     # training.batch_size = 32
     # sampling
     sampling = config.sampling
-    sampling.method = 'pc'
+    sampling.method = 'ode'
     sampling.predictor = 'euler_maruyama'
     sampling.corrector = 'none'
 
@@ -60,6 +60,6 @@ def get_config():
     eval.end_ckpt = 1
     eval.denoising_samples = False
     eval.enable_sampling = True
-    eval.batch_size = 128
+    eval.batch_size = 32
     eval.num_samples = 256
     return config

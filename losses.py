@@ -84,7 +84,7 @@ def get_sde_loss_fn(sde, train, reduce_mean=True, continuous=True, likelihood_we
     Returns:
       loss: A scalar that represents the average loss value across the mini-batch.
     """
-        start_t = None
+        start_t = eps
         if sde.start_t is not None:
             start_t = sde.start_t
         score_fn = mutils.get_score_fn(sde, model, train=train, continuous=continuous)

@@ -97,7 +97,7 @@ def denoise(workdir, eval_folder):
             batch = scaler(batch)
 
             noisy_batch = get_noisy_imgs_from_batch(config.training.start_t, batch, sde, inverse_scaler)
-            _, z, _ = likelihood_fn(score_model, batch)
+            _, z, _ = likelihood_fn(score_model, noisy_batch, data_t=config.training.start_t)
 
             this_sample_dir = os.path.join(eval_dir, f"ckpt_{ckpt}")
             tf.io.gfile.makedirs(this_sample_dir)

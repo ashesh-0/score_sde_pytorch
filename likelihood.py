@@ -64,13 +64,13 @@ def get_likelihood_fn(sde, inverse_scaler, hutchinson_type='Rademacher', rtol=1e
     def div_fn(model, x, t, noise):
         return get_div_fn(lambda xx, tt: drift_fn(model, xx, tt))(x, t, noise)
 
-    def likelihood_fn(model, data, data_t=eps):
+    def likelihood_fn(model, data, start_t=eps):
         """Compute an unbiased estimate to the log-likelihood in bits/dim.
 
     Args:
       model: A score model.
       data: A PyTorch tensor.
-      data_t: a float. This denotes which noise level the data is in.
+      start_t: a float. This denotes which noise level the data is in.
 
     Returns:
       bpd: A PyTorch tensor of shape [batch size]. The log-likelihoods on `data` in bits/dim.
@@ -95,7 +95,7 @@ def get_likelihood_fn(sde, inverse_scaler, hutchinson_type='Rademacher', rtol=1e
                 return np.concatenate([drift, logp_grad], axis=0)
 
             init = np.concatenate([mutils.to_flattened_numpy(data), np.zeros((shape[0], ))], axis=0)
-            solution = integrate.solve_ivp(ode_func, (data_t, sde.T), init, rtol=rtol, atol=atol, method=method)
+            solution = integrate.solve_ivp(ode_func, (start_t, sde.T), init, rtol=rtol, atol=atol, method=method)
             nfe = solution.nfev
             zp = solution.y[:, -1]
             z = mutils.from_flattened_numpy(zp[:-shape[0]], shape).to(data.device).type(torch.float32)

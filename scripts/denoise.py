@@ -5,6 +5,7 @@ We save three set of files:
 2. Reconstructed images.
 3. Noisy images (which were present in the training.)
 """
+import argparse
 import gc
 import io
 import logging
@@ -41,7 +42,13 @@ def write_to_file(fpath, data):
         fout.write(io_buffer.getvalue())
 
 
-def denoise(workdir, eval_folder):
+def denoise(workdir, eval_folder, latent_start_t=1e-3, noise_start_t=1e-3, sampling_start_t=1e-3):
+    """
+    latent_start_t: For computing latent representation, what do we want to say about the start time.
+    noise_start_t: How much noise do we want to add to the data. This noisy data will then be used as starting point
+                    for denoising.
+    sampling_start_t: In backward ode integration used for sampling, till what time do we want to integrate back.
+    """
     config = get_config()
     eval_dir = os.path.join(workdir, eval_folder)
     tf.io.gfile.makedirs(eval_dir)
@@ -96,12 +103,16 @@ def denoise(workdir, eval_folder):
             batch = batch.permute(0, 3, 1, 2)
             batch = scaler(batch)
 
-            noisy_batch = get_noisy_imgs_from_batch(config.training.start_t, batch, sde, inverse_scaler)
-            _, z, _ = likelihood_fn(score_model, noisy_batch, data_t=config.training.start_t)
+            noisy_batch = get_noisy_imgs_from_batch(noise_start_t, batch, sde, inverse_scaler)
+            _, z, _ = likelihood_fn(score_model, noisy_batch, start_t=latent_start_t)
 
             this_sample_dir = os.path.join(eval_dir, f"ckpt_{ckpt}")
             tf.io.gfile.makedirs(this_sample_dir)
-            samples, n = sampling_fn(score_model, z=z, start_t=config.training.start_t)
+            samples, n = sampling_fn(
+                score_model,
+                z=z,
+                start_t=sampling_start_t,
+            )
             samples = np.clip(samples.permute(0, 2, 3, 1).cpu().numpy() * 255., 0, 255).astype(np.uint8)
             samples = samples.reshape((-1, config.data.image_size, config.data.image_size, config.data.num_channels))
 
@@ -116,5 +127,17 @@ def denoise(workdir, eval_folder):
 
 if __name__ == '__main__':
     work_dir = '/tmp2/ashesh/ashesh/train_dir'
-    eval_dir = '/tmp2/ashesh/ashesh/train_dir/eval_dir3'
-    denoise(work_dir, eval_dir)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--noise_start_t', type=float, default=1e-3)
+    parser.add_argument('--latent_start_t', type=float, default=1e-3)
+    parser.add_argument('--sampling_start_t', type=float, default=1e-3)
+    args = parser.parse_args()
+    eval_dir = (f'/tmp2/ashesh/ashesh/train_dir/eval_dir_nt_{args.noise_start_t}_'
+                f'lt_{args.latent_start_t}_st_{args.sampling_start_t}')
+
+    denoise(work_dir,
+            eval_dir,
+            latent_start_t=args.latent_start_t,
+            noise_start_t=args.noise_start_t,
+            sampling_start_t=args.sampling_start_t)

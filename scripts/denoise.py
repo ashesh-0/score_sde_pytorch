@@ -31,7 +31,7 @@ from torch.utils import tensorboard
 from torchvision.utils import make_grid, save_image
 from utils import restore_checkpoint, save_checkpoint
 
-from scripts.get_marginal_probablity import get_noisy_imgs_from_batch
+from scripts.get_marginal_probablity import (convert_to_img, get_noisy_imgs_from_batch)
 
 
 def write_to_file(fpath, data):
@@ -101,7 +101,7 @@ def denoise(workdir, eval_folder):
 
             this_sample_dir = os.path.join(eval_dir, f"ckpt_{ckpt}")
             tf.io.gfile.makedirs(this_sample_dir)
-            samples, n = sampling_fn(score_model, z=z)
+            samples, n = sampling_fn(score_model, z=z, start_t=config.training.start_t)
             samples = np.clip(samples.permute(0, 2, 3, 1).cpu().numpy() * 255., 0, 255).astype(np.uint8)
             samples = samples.reshape((-1, config.data.image_size, config.data.image_size, config.data.num_channels))
 
@@ -109,11 +109,12 @@ def denoise(workdir, eval_folder):
             write_to_file(os.path.join(this_sample_dir, f"samples_{r}.npz"), samples)
             write_to_file(os.path.join(this_sample_dir, f"clean_data_{r}.npz"),
                           inverse_scaler(batch).permute(0, 2, 3, 1).cpu().numpy())
-            write_to_file(os.path.join(this_sample_dir, f"noisy_data_{r}.npz"), noisy_batch.cpu().numpy())
+            write_to_file(os.path.join(this_sample_dir, f"noisy_data_{r}.npz"),
+                          convert_to_img(noisy_batch).cpu().numpy())
             gc.collect()
 
 
 if __name__ == '__main__':
     work_dir = '/tmp2/ashesh/ashesh/train_dir'
-    eval_dir = '/tmp2/ashesh/ashesh/train_dir/eval_dir'
+    eval_dir = '/tmp2/ashesh/ashesh/train_dir/eval_dir3'
     denoise(work_dir, eval_dir)

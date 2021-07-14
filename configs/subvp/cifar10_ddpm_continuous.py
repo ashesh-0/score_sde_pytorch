@@ -56,10 +56,10 @@ def get_config():
 
     # Evaluate
     eval = config.eval
-    eval.begin_ckpt = 1
+    eval.begin_ckpt = 8
     eval.end_ckpt = 8
     eval.denoising_samples = False
     eval.enable_sampling = True
-    eval.batch_size = 128
-    eval.num_samples = 256
+    eval.batch_size = 16
+    eval.num_samples = 16
     return config

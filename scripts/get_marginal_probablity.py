@@ -8,8 +8,13 @@ from base_noisy_data import GaussianNoisyData
 from configs.subvp.cifar10_ddpm_continuous import get_config
 
 
-def get_noisy_imgs(t):
+def convert_to_img(data, inverse_scaler):
+    data[data < -1] = -1
+    data[data > 1] = 1
+    return inverse_scaler(data).permute(0, 2, 3, 1)
 
+
+def get_noisy_imgs(t):
     config = get_config()
     train_ds, eval_ds, _ = datasets.get_dataset(config, uniform_dequantization=config.data.uniform_dequantization)
     scaler = datasets.get_data_scaler(config)
@@ -19,7 +24,8 @@ def get_noisy_imgs(t):
     batch = batch.permute(0, 3, 1, 2)
     batch = scaler(batch)
     sde = sde_lib.subVPSDE(beta_min=config.model.beta_min, beta_max=config.model.beta_max, N=config.model.num_scales)
-    return get_noisy_imgs_from_batch(t, batch, sde, inverse_scaler)
+    perturbed_data = get_noisy_imgs_from_batch(t, batch, sde, inverse_scaler)
+    return convert_to_img(perturbed_data, inverse_scaler)
 
 
 def get_noisy_imgs_from_batch(t, batch, sde, inverse_scaler):
@@ -28,9 +34,7 @@ def get_noisy_imgs_from_batch(t, batch, sde, inverse_scaler):
 
     z = torch.randn_like(batch)
     perturbed_data = mean + std[:, None, None, None] * z
-    perturbed_data[perturbed_data < -1] = -1
-    perturbed_data[perturbed_data > 1] = 1
-    return inverse_scaler(perturbed_data).permute(0, 2, 3, 1)
+    return perturbed_data
 
 
 if __name__ == '__main__':

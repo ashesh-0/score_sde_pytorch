@@ -110,7 +110,7 @@ def denoise(workdir, eval_folder):
             write_to_file(os.path.join(this_sample_dir, f"clean_data_{r}.npz"),
                           inverse_scaler(batch).permute(0, 2, 3, 1).cpu().numpy())
             write_to_file(os.path.join(this_sample_dir, f"noisy_data_{r}.npz"),
-                          convert_to_img(noisy_batch).cpu().numpy())
+                          convert_to_img(noisy_batch, inverse_scaler).cpu().numpy())
             gc.collect()
 
 

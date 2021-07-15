@@ -159,14 +159,66 @@ This work is built upon some previous papers which might also interest you:
 [EvalMetrics Input] MSE:184.18+-5.848
 [EvalMetrics Input] PSNR:25.48+-0.138
 
---noise_start_t=0.1 --latent_start_t=0.1 --sampling_start_t=0.001
-[EvalMetrics Recons] MSE:75.25+-58.295
-[EvalMetrics Recons] PSNR:29.53+-0.843
+### How much back should one go while doing sampling?
 
 --noise_start_t=0.1 --latent_start_t=0.1 --sampling_start_t=0.1
 [EvalMetrics Recons] MSE:184.90+-16.415
 [EvalMetrics Recons] PSNR:25.47+-0.258
 
+--noise_start_t=0.1 --latent_start_t=0.1 --sampling_start_t=0.09
+[EvalMetrics Recons] MSE:142.70+-14.229
+[EvalMetrics Recons] PSNR:26.60+-0.300
+
 --noise_start_t=0.1 --latent_start_t=0.1 --sampling_start_t=0.05
 [EvalMetrics Recons] MSE:85.13+-42.172
 [EvalMetrics Recons] PSNR:28.92+-0.614
+
+--noise_start_t=0.1 --latent_start_t=0.1 --sampling_start_t=0.001
+[EvalMetrics Recons] MSE:75.25+-58.295
+[EvalMetrics Recons] PSNR:29.53+-0.843
+
+--noise_start_t=0.1 --latent_start_t=0.1 --sampling_start_t=-0.05
+[EvalMetrics Recons] MSE:72.18+-12.587
+[EvalMetrics Recons] PSNR:29.59+-0.578
+
+### Latent representation start_t different from actual
+--noise_start_t=0.1 --latent_start_t=0.08
+[EvalMetrics Recons] MSE:102.19+-21.287
+[EvalMetrics Recons] PSNR:28.08+-0.523
+
+--noise_start_t=0.1 --latent_start_t=0.11
+[EvalMetrics Recons] MSE:63.66+-30.777
+[EvalMetrics Recons] PSNR:30.25+-0.952
+
+--noise_start_t=0.1 --latent_start_t=0.12
+[EvalMetrics Recons] MSE:57.47+-23.756
+[EvalMetrics Recons] PSNR:30.68+-1.002
+
+--noise_start_t=0.1 --latent_start_t=0.125
+[EvalMetrics Recons] MSE:57.60+-32.041
+[EvalMetrics Recons] PSNR:30.72+-1.102
+
+--noise_start_t=0.1 --latent_start_t=0.13
+[EvalMetrics Recons] MSE:57.71+-25.711
+[EvalMetrics Recons] PSNR:30.69+-1.095
+
+--noise_start_t=0.1 --latent_start_t=0.15
+[EvalMetrics Recons] MSE:70.06+-22.319
+[EvalMetrics Recons] PSNR:29.84+-1.155
+
+--noise_start_t=0.1 --latent_start_t=0.2
+[EvalMetrics Recons] MSE:155.77+-44.643
+[EvalMetrics Recons] PSNR:26.40+-1.370
+
+### noise and latent representation have same start_t which is different from 0.1
+--noise_start_t=0.05 --latent_start_t=0.05
+[EvalMetrics Input] MSE:14.92+-0.508
+[EvalMetrics Input] PSNR:36.40+-0.147
+[EvalMetrics Recons] MSE:14.82+-29.564
+[EvalMetrics Recons] PSNR:37.05+-1.328
+
+--noise_start_t=0.15 --latent_start_t=0.15
+[EvalMetrics Input] MSE:763.05+-21.152
+[EvalMetrics Input] PSNR:19.31+-0.120
+[EvalMetrics Recons] MSE:136.06+-30.818
+[EvalMetrics Recons] PSNR:26.90+-0.947

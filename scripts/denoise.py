@@ -22,6 +22,7 @@ import tensorflow_gan as tfgan
 import torch
 from absl import flags
 from configs.subvp.cifar10_ddpm_continuous import get_config
+from eval_metrics import EvalMetrics
 from likelihood import get_likelihood_fn
 # Keep the import below for registering all model definitions
 from models import ddpm, ncsnpp, ncsnv2
@@ -30,6 +31,7 @@ from models.ema import ExponentialMovingAverage
 from run_lib import train
 from torch.utils import tensorboard
 from torchvision.utils import make_grid, save_image
+from tqdm import tqdm
 from utils import restore_checkpoint, save_checkpoint
 
 from scripts.get_marginal_probablity import (convert_to_img, get_noisy_imgs_from_batch)
@@ -52,6 +54,9 @@ def denoise(workdir, eval_folder, latent_start_t=1e-3, noise_start_t=1e-3, sampl
     config = get_config()
     eval_dir = os.path.join(workdir, eval_folder)
     tf.io.gfile.makedirs(eval_dir)
+
+    input_metrics = EvalMetrics('Input')
+    recons_metrics = EvalMetrics('Recons')
 
     # Build data pipeline
     train_ds, eval_ds, _ = datasets.get_dataset(config,
@@ -95,7 +100,7 @@ def denoise(workdir, eval_folder, latent_start_t=1e-3, noise_start_t=1e-3, sampl
         assert config.eval.enable_sampling
         num_sampling_rounds = config.eval.num_samples // config.eval.batch_size + 1
 
-        for r in range(num_sampling_rounds):
+        for r in tqdm(range(num_sampling_rounds)):
             logging.info("sampling -- ckpt: %d, round: %d" % (ckpt, r))
 
             # Get the latent codes
@@ -113,16 +118,34 @@ def denoise(workdir, eval_folder, latent_start_t=1e-3, noise_start_t=1e-3, sampl
                 z=z,
                 start_t=sampling_start_t,
             )
-            samples = np.clip(samples.permute(0, 2, 3, 1).cpu().numpy() * 255., 0, 255).astype(np.uint8)
-            samples = samples.reshape((-1, config.data.image_size, config.data.image_size, config.data.num_channels))
+            samples = samples.permute(0, 2, 3, 1)
+            samples = torch.clamp(samples, min=0, max=1)
+            samples = 255 * samples
+
+            noisy_batch = convert_to_img(noisy_batch, inverse_scaler)
+            noisy_batch = 255 * noisy_batch
+
+            batch = inverse_scaler(batch).permute(0, 2, 3, 1)
+            batch = 255 * batch
+
+            input_metrics.update(batch, noisy_batch)
+            recons_metrics.update(batch, samples)
+
+            samples = (samples.cpu().numpy()).astype(np.uint8)
+            batch = (batch.cpu().numpy()).astype(np.uint8)
+            noisy_batch = (noisy_batch.cpu().numpy()).astype(np.uint8)
 
             # Write samples to disk or Google Cloud Storage
             write_to_file(os.path.join(this_sample_dir, f"samples_{r}.npz"), samples)
-            write_to_file(os.path.join(this_sample_dir, f"clean_data_{r}.npz"),
-                          inverse_scaler(batch).permute(0, 2, 3, 1).cpu().numpy())
-            write_to_file(os.path.join(this_sample_dir, f"noisy_data_{r}.npz"),
-                          convert_to_img(noisy_batch, inverse_scaler).cpu().numpy())
+            write_to_file(os.path.join(this_sample_dir, f"clean_data_{r}.npz"), batch)
+            write_to_file(os.path.join(this_sample_dir, f"noisy_data_{r}.npz"), noisy_batch)
             gc.collect()
+
+    print('')
+    print('------------------------------------------------')
+    print('')
+    _ = input_metrics.get()
+    _ = recons_metrics.get()
 
 
 if __name__ == '__main__':

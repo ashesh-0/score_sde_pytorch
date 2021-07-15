@@ -156,8 +156,17 @@ This work is built upon some previous papers which might also interest you:
 * Ho, Jonathan, Ajay Jain, and Pieter Abbeel. "Denoising diffusion probabilistic models." *Proceedings of the 34th Annual Conference on Neural Information Processing Systems*. 2020.
 
 
-I0707 16:49:05.672535 140679160731392 run_lib.py:415] ckpt-2 --- inception_score: 7.577677e+00, FID: 9.217492e+01, KID: 6.341258e-03
-I0707 17:03:00.235848 140190985688832 run_lib.py:415] ckpt-1 --- inception_score: 6.797537e+00, FID: 9.390079e+01, KID: 5.542135e-03
+[EvalMetrics Input] MSE:184.18+-5.848
+[EvalMetrics Input] PSNR:25.48+-0.138
 
+--noise_start_t=0.1 --latent_start_t=0.1 --sampling_start_t=0.001
+[EvalMetrics Recons] MSE:75.25+-58.295
+[EvalMetrics Recons] PSNR:29.53+-0.843
 
+--noise_start_t=0.1 --latent_start_t=0.1 --sampling_start_t=0.1
+[EvalMetrics Recons] MSE:184.90+-16.415
+[EvalMetrics Recons] PSNR:25.47+-0.258
 
+--noise_start_t=0.1 --latent_start_t=0.1 --sampling_start_t=0.05
+[EvalMetrics Recons] MSE:85.13+-42.172
+[EvalMetrics Recons] PSNR:28.92+-0.614

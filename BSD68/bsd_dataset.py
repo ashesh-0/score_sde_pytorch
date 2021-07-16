@@ -23,11 +23,11 @@ def get_preprocess_fn(crop_size, random_flip, evaluation):
 
 
 def set_dataset_options(ds, config, evaluation):
-    shuffle_buffer_size = 100
+    shuffle_buffer_size = 10000
     prefetch_size = tf.data.experimental.AUTOTUNE
     num_epochs = None if not evaluation else 1
     batch_size = config.training.batch_size if not evaluation else config.eval.batch_size
-    crop_size = config.data.crop_size
+    crop_size = config.data.image_size
 
     ds = ds.map(get_preprocess_fn(crop_size, config.data.random_flip, evaluation),
                 num_parallel_calls=tf.data.experimental.AUTOTUNE)
@@ -42,7 +42,7 @@ def get_bsd_dataset(split, config, data_dir='/tmp2/ashesh/ashesh/BSD68_reproduci
         data = np.load(os.path.join(data_dir, 'train/DCNN400_train_gaussian25.npy'), allow_pickle=True)
     elif split == 'val':
         data = np.load(os.path.join(data_dir, 'val/DCNN400_validation_gaussian25.npy'), allow_pickle=True)
-        n = int(np.ceil(180 / config.data.crop_size))
+        n = int(np.ceil(config.data.raw_img_size / config.data.image_size))
         data = np.repeat(data, n**2, axis=0)
 
     dset = tf.data.Dataset.from_tensor_slices({'image': data})

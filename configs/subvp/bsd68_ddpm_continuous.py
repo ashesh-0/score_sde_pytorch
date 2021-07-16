@@ -39,7 +39,7 @@ def get_config():
     data = config.data
     data.dataset = 'BSD68'
     data.image_size = 32
-    data.crop_size = 32
+    data.raw_img_size = 180
     data.num_channels = 1
     data.centered = True
     data.base_noise_std = 25

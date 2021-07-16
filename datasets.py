@@ -20,7 +20,6 @@ import tensorflow as tf
 import tensorflow_datasets as tfds
 
 from BSD68.bsd_dataset import get_bsd_dataset
-from run_lib import evaluate
 
 
 def get_data_scaler(config):

@@ -28,7 +28,7 @@ def get_config():
     training.continuous = True
     training.reduce_mean = True
     training.start_t = 0.1
-    # training.batch_size = 32
+    training.batch_size = 16
     # sampling
     sampling = config.sampling
     sampling.method = 'ode'
@@ -38,13 +38,11 @@ def get_config():
     # data
     data = config.data
     data.dataset = 'BSD68'
-    data.image_size = 180
-    data.random_flip = True
-    data.centered = False
-    data.uniform_dequantization = False
-    data.num_channels = 3
+    data.image_size = 32
+    data.crop_size = 32
+    data.num_channels = 1
+    data.centered = True
     data.base_noise_std = 25
-    data.crop_size = 128
 
     # model
     model = config.model
@@ -66,6 +64,6 @@ def get_config():
     eval.end_ckpt = 8
     eval.denoising_samples = False
     eval.enable_sampling = True
-    eval.batch_size = 128
+    eval.batch_size = 16
     eval.num_samples = 1024
     return config

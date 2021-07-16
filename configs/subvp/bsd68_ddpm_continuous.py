@@ -28,7 +28,7 @@ def get_config():
     training.continuous = True
     training.reduce_mean = True
     training.start_t = 0.1
-    training.batch_size = 16
+    training.batch_size = 32
     # sampling
     sampling = config.sampling
     sampling.method = 'ode'
@@ -38,7 +38,7 @@ def get_config():
     # data
     data = config.data
     data.dataset = 'BSD68'
-    data.image_size = 32
+    data.image_size = 64
     data.raw_img_size = 180
     data.num_channels = 1
     data.centered = True

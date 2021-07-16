@@ -20,6 +20,7 @@ import tensorflow as tf
 import tensorflow_datasets as tfds
 
 from BSD68.bsd_dataset import get_bsd_dataset
+from run_lib import evaluate
 
 
 def get_data_scaler(config):
@@ -142,8 +143,8 @@ def get_dataset(config, uniform_dequantization=False, evaluation=False):
         train_split_name = eval_split_name = 'train'
 
     elif config.data.dataset == 'BSD68':
-        train_ds = get_bsd_dataset('train', config)
-        eval_ds = get_bsd_dataset('val', config)
+        train_ds = get_bsd_dataset('train', config, evaluation=evaluation)
+        eval_ds = get_bsd_dataset('val', config, evaluation=evaluation)
         return train_ds, eval_ds, None
     else:
         raise NotImplementedError(f'Dataset {config.data.dataset} not yet supported.')

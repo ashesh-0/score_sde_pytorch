@@ -12,9 +12,8 @@ def get_preprocess_fn(crop_size, random_flip, evaluation):
         img = img['image']
         img = tf.image.random_crop(value=img, size=(crop_size, crop_size))
         img = tf.expand_dims(img, -1)
-        # img = tf.repeat(img, 3, axis=2)
-        # import pdb
-        # pdb.set_trace()
+        img = tf.clip_by_value(img, clip_value_min=0, clip_value_max=255) / 255.0
+
         if random_flip and not evaluation:
             img = tf.image.random_flip_left_right(img)
         return {'image': img}
@@ -37,7 +36,7 @@ def set_dataset_options(ds, config, evaluation):
     return ds.prefetch(prefetch_size)
 
 
-def get_bsd_dataset(split, config, data_dir='/tmp2/ashesh/ashesh/BSD68_reproducibility_data/'):
+def get_bsd_dataset(split, config, evaluation=False, data_dir='/tmp2/ashesh/ashesh/BSD68_reproducibility_data/'):
     if split == 'train':
         data = np.load(os.path.join(data_dir, 'train/DCNN400_train_gaussian25.npy'), allow_pickle=True)
     elif split == 'val':
@@ -46,5 +45,4 @@ def get_bsd_dataset(split, config, data_dir='/tmp2/ashesh/ashesh/BSD68_reproduci
         data = np.repeat(data, n**2, axis=0)
 
     dset = tf.data.Dataset.from_tensor_slices({'image': data})
-    evaluation = split != 'train'
     return set_dataset_options(dset, config, evaluation)

@@ -139,7 +139,9 @@ def train(config, workdir):
         # Convert data to JAX arrays and normalize them. Use ._numpy() to avoid copy.
         batch = torch.from_numpy(next(train_iter)['image']._numpy()).to(config.device).float()
         batch = batch.permute(0, 3, 1, 2)
+
         batch = scaler(batch)
+
         # Execute one training step
         loss = train_step_fn(state, batch)
         if step % config.training.log_freq == 0:

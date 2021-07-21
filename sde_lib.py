@@ -165,18 +165,23 @@ class VPSDE(SDE):
 
 
 class subVPSDE(SDE):
-    def __init__(self, beta_min=0.1, beta_max=20, N=1000, start_t=None):
+    def __init__(self, beta_min=0.1, beta_max=20, N=1000, start_t=None, existing_noise_t=None):
         """Construct the sub-VP SDE that excels at likelihoods.
 
     Args:
       beta_min: value of beta(0)
       beta_max: value of beta(1)
       N: number of discretization steps
+      start_t: In training, one randomly selects t and then samples from P(x(t)| input_image). It ensures that t is
+                sampled from [start_t,1]
+      existing_noise_t: Sometimes, the data is noisy from the beginning. It contains that value of t which represents
+      its noise level
     """
         super().__init__(N)
         self.beta_0 = beta_min
         self.beta_1 = beta_max
         self.start_t = start_t
+        self.existing_noise_t = existing_noise_t
         self.N = N
         print(f'[{self.__class__.__name__}] Start_T:{self.start_t}')
 

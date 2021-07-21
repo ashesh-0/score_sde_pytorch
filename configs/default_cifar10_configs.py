@@ -45,6 +45,8 @@ def get_default_configs():
     data.centered = False
     data.uniform_dequantization = False
     data.num_channels = 3
+    # How much noisy data already is
+    data.existing_noise_t = None
 
     # model
     config.model = model = ml_collections.ConfigDict()

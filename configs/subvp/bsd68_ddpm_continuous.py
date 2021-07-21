@@ -42,7 +42,8 @@ def get_config():
     data.raw_img_size = 180
     data.num_channels = 1
     data.centered = True
-    data.base_noise_std = 25
+    # how much noisy data already is.
+    data.existing_noise_t = None
 
     # model
     model = config.model
@@ -54,14 +55,14 @@ def get_config():
     model.nf = 128
     model.ch_mult = (1, 2, 2, 2)
     model.num_res_blocks = 2
-    model.attn_resolutions = (16, )
+    model.attn_resolutions = (data.image_size // 2, )
     model.resamp_with_conv = True
     model.conditional = True
 
     # Evaluate
     eval = config.eval
-    eval.begin_ckpt = 8
-    eval.end_ckpt = 8
+    eval.begin_ckpt = 1
+    eval.end_ckpt = 1
     eval.denoising_samples = False
     eval.enable_sampling = True
     eval.batch_size = 16

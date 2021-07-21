@@ -15,26 +15,40 @@ import datasets
 import likelihood
 import losses
 import numpy as np
+import run_lib
 import sampling
 import sde_lib
 import tensorflow as tf
 import tensorflow_gan as tfgan
 import torch
-from absl import flags
+from absl import app, flags
 from configs.subvp.cifar10_ddpm_continuous import get_config
 from eval_metrics import EvalMetrics
 from likelihood import get_likelihood_fn
+from ml_collections.config_flags import config_flags
 # Keep the import below for registering all model definitions
 from models import ddpm, ncsnpp, ncsnv2
 from models import utils as mutils
 from models.ema import ExponentialMovingAverage
 from run_lib import train
+# from tensorflow.app import flags
 from torch.utils import tensorboard
 from torchvision.utils import make_grid, save_image
 from tqdm import tqdm
 from utils import restore_checkpoint, save_checkpoint
 
 from scripts.get_marginal_probablity import (convert_to_img, get_noisy_imgs_from_batch)
+
+config_flags.DEFINE_config_file("config", None, "Training configuration.", lock_config=True)
+flags.DEFINE_string("workdir", None, "Work directory.")
+
+flags.DEFINE_float('latent_start_t', 1e-3, 'Latent start_t')
+flags.DEFINE_float('sampling_start_t', 1e-3, 'Sampling start_t')
+
+# flags.DEFINE_string("eval_folder", "eval", "The folder name for storing evaluation results")
+flags.mark_flags_as_required(["workdir", "config"])
+
+FLAGS = flags.FLAGS
 
 
 def write_to_file(fpath, data):
@@ -44,15 +58,25 @@ def write_to_file(fpath, data):
         fout.write(io_buffer.getvalue())
 
 
-def denoise(workdir, eval_folder, latent_start_t=1e-3, noise_start_t=1e-3, sampling_start_t=1e-3):
+def main(argv):
     """
     latent_start_t: For computing latent representation, what do we want to say about the start time.
     noise_start_t: How much noise do we want to add to the data. This noisy data will then be used as starting point
                     for denoising.
     sampling_start_t: In backward ode integration used for sampling, till what time do we want to integrate back.
     """
-    config = get_config()
-    eval_dir = os.path.join(workdir, eval_folder)
+    # config = get_config()
+    workdir = FLAGS.workdir
+    latent_start_t = FLAGS.latent_start_t
+    sampling_start_t = FLAGS.sampling_start_t
+    config = FLAGS.config
+    start_t = config.training.start_t
+
+    eval_dir = (f'{workdir}/eval_dir_nt_{start_t}_' f'lt_{latent_start_t}_st_{sampling_start_t}')
+    print('')
+    print('Evaluation will be saved to ', eval_dir)
+    print('')
+
     tf.io.gfile.makedirs(eval_dir)
 
     input_metrics = EvalMetrics('Input')
@@ -75,9 +99,21 @@ def denoise(workdir, eval_folder, latent_start_t=1e-3, noise_start_t=1e-3, sampl
 
     checkpoint_dir = os.path.join(workdir, "checkpoints")
 
+    if start_t is None:
+        start_t = 1e-3
+    existing_noise_t = config.data.existing_noise_t
+    if existing_noise_t is None:
+        existing_noise_t = 0
+    else:
+        assert existing_noise_t <= start_t, f'existing_noise_t:{existing_noise_t} > start_t:{start_t}'
+
     # Setup SDEs
     assert config.training.sde.lower() == 'subvpsde'
-    sde = sde_lib.subVPSDE(beta_min=config.model.beta_min, beta_max=config.model.beta_max, N=config.model.num_scales)
+    sde = sde_lib.subVPSDE(beta_min=config.model.beta_min,
+                           beta_max=config.model.beta_max,
+                           N=config.model.num_scales,
+                           start_t=start_t,
+                           existing_noise_t=existing_noise_t)
     sampling_eps = 1e-3
 
     sampling_shape = (config.eval.batch_size, config.data.num_channels, config.data.image_size, config.data.image_size)
@@ -108,7 +144,7 @@ def denoise(workdir, eval_folder, latent_start_t=1e-3, noise_start_t=1e-3, sampl
             batch = batch.permute(0, 3, 1, 2)
             batch = scaler(batch)
 
-            noisy_batch = get_noisy_imgs_from_batch(noise_start_t, batch, sde, inverse_scaler)
+            noisy_batch = get_noisy_imgs_from_batch(start_t - existing_noise_t, batch, sde, inverse_scaler)
             _, z, _ = likelihood_fn(score_model, noisy_batch, start_t=latent_start_t)
 
             this_sample_dir = os.path.join(eval_dir, f"ckpt_{ckpt}")
@@ -149,18 +185,5 @@ def denoise(workdir, eval_folder, latent_start_t=1e-3, noise_start_t=1e-3, sampl
 
 
 if __name__ == '__main__':
-    work_dir = '/tmp2/ashesh/ashesh/train_dir'
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--noise_start_t', type=float, default=1e-3)
-    parser.add_argument('--latent_start_t', type=float, default=1e-3)
-    parser.add_argument('--sampling_start_t', type=float, default=1e-3)
-    args = parser.parse_args()
-    eval_dir = (f'/tmp2/ashesh/ashesh/train_dir/eval_dir_nt_{args.noise_start_t}_'
-                f'lt_{args.latent_start_t}_st_{args.sampling_start_t}')
-
-    denoise(work_dir,
-            eval_dir,
-            latent_start_t=args.latent_start_t,
-            noise_start_t=args.noise_start_t,
-            sampling_start_t=args.sampling_start_t)
+    app.run(main)

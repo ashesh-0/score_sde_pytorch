@@ -252,3 +252,9 @@ This work is built upon some previous papers which might also interest you:
 --noise_start_t=0.2 --latent_start_t=0.2 --sampling_start_t=0.0
 [EvalMetrics Recons] MSE:238.18+-59.125
 [EvalMetrics Recons] PSNR:24.50+-1.133
+
+### Skipping the forward integration.
+Performance is slightly better. And the time is reduced by almost half.
+--noise_start_t=0.1 --latent_start_t=0.1 --sampling_end_t=-0.05 --skip_forward_integration
+[EvalMetrics Recons] MSE:71.17+-7.271
+[EvalMetrics Recons] PSNR:29.63+-0.450

@@ -452,12 +452,14 @@ def get_ode_sampler(sde,
         rsde = sde.reverse(score_fn, probability_flow=True)
         return rsde.sde(x, t)[0]
 
-    def ode_sampler(model, z=None, start_t=eps):
+    def ode_sampler(model, z=None, start_t=sde.T, end_t=eps):
         """The probability flow ODE sampler with black-box ODE solver.
 
     Args:
       model: A score model.
       z: If present, generate samples from latent code `z`.
+      start_t: what t does the z corresponds to.
+      end_t: Till what point should we need to reverse integrate
     Returns:
       samples, number of function evaluations.
     """
@@ -476,7 +478,7 @@ def get_ode_sampler(sde,
                 return to_flattened_numpy(drift)
 
             # Black-box ODE solver for the probability flow ODE
-            solution = integrate.solve_ivp(ode_func, (sde.T, start_t),
+            solution = integrate.solve_ivp(ode_func, (start_t, end_t),
                                            to_flattened_numpy(x),
                                            rtol=rtol,
                                            atol=atol,

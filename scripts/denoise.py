@@ -43,7 +43,9 @@ config_flags.DEFINE_config_file("config", None, "Training configuration.", lock_
 flags.DEFINE_string("workdir", None, "Work directory.")
 
 flags.DEFINE_float('latent_start_t', 1e-3, 'Latent start_t')
-flags.DEFINE_float('sampling_start_t', 1e-3, 'Sampling start_t')
+flags.DEFINE_float('sampling_end_t', 1e-3, 'Sampling end_t')
+flags.DEFINE_bool('skip_forward_integration', False, 'If True, the the forward integration is not used.'
+                  ' We just use the reverse integration')
 
 # flags.DEFINE_string("eval_folder", "eval", "The folder name for storing evaluation results")
 flags.mark_flags_as_required(["workdir", "config"])
@@ -63,16 +65,18 @@ def main(argv):
     latent_start_t: For computing latent representation, what do we want to say about the start time.
     noise_start_t: How much noise do we want to add to the data. This noisy data will then be used as starting point
                     for denoising.
-    sampling_start_t: In backward ode integration used for sampling, till what time do we want to integrate back.
+    sampling_end_t: In backward ode integration used for sampling, till what time do we want to integrate back.
     """
     # config = get_config()
     workdir = FLAGS.workdir
     latent_start_t = FLAGS.latent_start_t
-    sampling_start_t = FLAGS.sampling_start_t
+    sampling_end_t = FLAGS.sampling_end_t
     config = FLAGS.config
     start_t = config.training.start_t
+    skip_forward_integration = FLAGS.skip_forward_integration
 
-    eval_dir = (f'{workdir}/eval_dir_nt_{start_t}_' f'lt_{latent_start_t}_st_{sampling_start_t}')
+    eval_dir = (f'{workdir}/eval_dir_nt_{start_t}_'
+                f'lt_{latent_start_t}_st_{sampling_end_t}_skipF_{int(skip_forward_integration)}')
     print('')
     print('Evaluation will be saved to ', eval_dir)
     print('')
@@ -136,6 +140,8 @@ def main(argv):
         assert config.eval.enable_sampling
         num_sampling_rounds = config.eval.num_samples // config.eval.batch_size + 1
 
+        this_sample_dir = os.path.join(eval_dir, f"ckpt_{ckpt}")
+        tf.io.gfile.makedirs(this_sample_dir)
         for r in tqdm(range(num_sampling_rounds)):
             logging.info("sampling -- ckpt: %d, round: %d" % (ckpt, r))
 
@@ -145,15 +151,22 @@ def main(argv):
             batch = scaler(batch)
 
             noisy_batch = get_noisy_imgs_from_batch(start_t - existing_noise_t, batch, sde, inverse_scaler)
-            _, z, _ = likelihood_fn(score_model, noisy_batch, start_t=latent_start_t)
+            if skip_forward_integration:
+                samples, n = sampling_fn(
+                    score_model,
+                    z=noisy_batch,
+                    end_t=sampling_end_t,
+                    start_t=latent_start_t,
+                )
 
-            this_sample_dir = os.path.join(eval_dir, f"ckpt_{ckpt}")
-            tf.io.gfile.makedirs(this_sample_dir)
-            samples, n = sampling_fn(
-                score_model,
-                z=z,
-                start_t=sampling_start_t,
-            )
+            else:
+                _, z, _ = likelihood_fn(score_model, noisy_batch, start_t=latent_start_t)
+
+                samples, n = sampling_fn(
+                    score_model,
+                    z=z,
+                    end_t=sampling_end_t,
+                )
             samples = samples.permute(0, 2, 3, 1)
             samples = torch.clamp(samples, min=0, max=1)
             samples = 255 * samples

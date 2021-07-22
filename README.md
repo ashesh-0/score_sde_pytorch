@@ -181,6 +181,26 @@ This work is built upon some previous papers which might also interest you:
 [EvalMetrics Recons] MSE:72.18+-12.587
 [EvalMetrics Recons] PSNR:29.59+-0.578
 
+--noise_start_t=0.1 --latent_start_t=0.1 --sampling_start_t=-0.1
+[EvalMetrics Recons] MSE:72.17+-8.731
+[EvalMetrics Recons] PSNR:29.58+-0.486
+
+--noise_start_t=0.1 --latent_start_t=0.1 --sampling_start_t=-0.15
+[EvalMetrics Recons] MSE:72.63+-15.301
+[EvalMetrics Recons] PSNR:29.57+-0.622
+
+--noise_start_t=0.1 --latent_start_t=0.1 --sampling_start_t=-0.3
+[EvalMetrics Recons] MSE:73.47+-27.320
+[EvalMetrics Recons] PSNR:29.56+-0.708
+
+--noise_start_t=0.1 --latent_start_t=0.1 --sampling_start_t=-0.5
+[EvalMetrics Recons] MSE:73.81+-35.179
+[EvalMetrics Recons] PSNR:29.56+-0.743
+
+
+### Trying out denoising different amounts of noise
+
+
 ### Latent representation start_t different from actual
 --noise_start_t=0.1 --latent_start_t=0.08
 [EvalMetrics Recons] MSE:102.19+-21.287
@@ -211,14 +231,24 @@ This work is built upon some previous papers which might also interest you:
 [EvalMetrics Recons] PSNR:26.40+-1.370
 
 ### noise and latent representation have same start_t which is different from 0.1
---noise_start_t=0.05 --latent_start_t=0.05
+--noise_start_t=0.05 --latent_start_t=0.05 --sampling_start_t=0.001
 [EvalMetrics Input] MSE:14.92+-0.508
 [EvalMetrics Input] PSNR:36.40+-0.147
 [EvalMetrics Recons] MSE:14.82+-29.564
 [EvalMetrics Recons] PSNR:37.05+-1.328
 
---noise_start_t=0.15 --latent_start_t=0.15
+--noise_start_t=0.15 --latent_start_t=0.15 --sampling_start_t=0.001
 [EvalMetrics Input] MSE:763.05+-21.152
 [EvalMetrics Input] PSNR:19.31+-0.120
 [EvalMetrics Recons] MSE:136.06+-30.818
 [EvalMetrics Recons] PSNR:26.90+-0.947
+
+--noise_start_t=0.2 --latent_start_t=0.2 --sampling_start_t=-0.05
+[EvalMetrics Input] MSE:1925.68+-57.070
+[EvalMetrics Input] PSNR:15.29+-0.128
+[EvalMetrics Recons] MSE:236.29+-59.675
+[EvalMetrics Recons] PSNR:24.54+-1.142
+
+--noise_start_t=0.2 --latent_start_t=0.2 --sampling_start_t=0.0
+[EvalMetrics Recons] MSE:238.18+-59.125
+[EvalMetrics Recons] PSNR:24.50+-1.133

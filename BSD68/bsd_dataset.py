@@ -19,8 +19,8 @@ def get_preprocess_fn(crop_size, random_flip, evaluation):
             img = tf.image.random_crop(value=img, size=(crop_size, crop_size))
 
         img = tf.expand_dims(img, -1)
-        # img = img / 255.0
-        img = tf.clip_by_value(img, clip_value_min=0, clip_value_max=255) / 255.0
+        img = img / 255.0
+        # img = tf.clip_by_value(img, clip_value_min=0, clip_value_max=255) / 255.0
 
         if random_flip and not evaluation:
             img = tf.image.random_flip_left_right(img)

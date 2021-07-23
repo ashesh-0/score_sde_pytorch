@@ -183,7 +183,7 @@ class subVPSDE(SDE):
         self.start_t = start_t
         self.existing_noise_t = existing_noise_t
         self.N = N
-        print(f'[{self.__class__.__name__}] Start_T:{self.start_t}')
+        print(f'[{self.__class__.__name__}] Start_T:{self.start_t} Existing_T:{self.existing_noise_t}')
 
     @property
     def T(self):

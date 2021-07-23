@@ -43,7 +43,7 @@ def get_config():
     data.num_channels = 1
     data.centered = True
     # how much noisy data already is.
-    data.existing_noise_t = None
+    data.existing_noise_t = 0.1
 
     # model
     model = config.model
@@ -65,6 +65,6 @@ def get_config():
     eval.end_ckpt = 1
     eval.denoising_samples = False
     eval.enable_sampling = True
-    eval.batch_size = 16
+    eval.batch_size = 128
     eval.num_samples = 1024
     return config

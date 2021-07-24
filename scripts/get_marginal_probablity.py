@@ -6,12 +6,7 @@ import sde_lib
 import torch
 from base_noisy_data import GaussianNoisyData
 from configs.subvp.cifar10_ddpm_continuous import get_config
-
-
-def convert_to_img(data, inverse_scaler):
-    data[data < -1] = -1
-    data[data > 1] = 1
-    return inverse_scaler(data).permute(0, 2, 3, 1)
+from denoise_utils import convert_to_img
 
 
 def get_noisy_imgs(t):

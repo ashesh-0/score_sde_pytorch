@@ -448,6 +448,8 @@ def get_ode_sampler(sde,
 
     def drift_fn(model, x, t):
         """Get the drift function of the reverse-time SDE."""
+        # import pdb
+        # pdb.set_trace()
         score_fn = get_score_fn(sde, model, train=False, continuous=True)
         rsde = sde.reverse(score_fn, probability_flow=True)
         return rsde.sde(x, t)[0]

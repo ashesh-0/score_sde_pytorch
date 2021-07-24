@@ -3,6 +3,7 @@ import os
 
 import numpy as np
 import tensorflow as tf
+import torch
 
 import datasets
 import losses
@@ -13,6 +14,36 @@ from likelihood import get_likelihood_fn
 from models import utils as mutils
 from models.ema import ExponentialMovingAverage
 from utils import restore_checkpoint
+
+
+def dump_data(batch, noisy_batch, samples, output_dir, sampling_round):
+    samples = (samples.cpu().numpy()).astype(np.uint8)
+    batch = (batch.cpu().numpy()).astype(np.uint8)
+    noisy_batch = (noisy_batch.cpu().numpy()).astype(np.uint8)
+
+    # Write samples to disk or Google Cloud Storage
+    write_to_file(os.path.join(output_dir, f"samples_{sampling_round}.npz"), samples)
+    write_to_file(os.path.join(output_dir, f"clean_data_{sampling_round}.npz"), batch)
+    write_to_file(os.path.join(output_dir, f"noisy_data_{sampling_round}.npz"), noisy_batch)
+
+
+def convert_to_img(data, inverse_scaler):
+    data[data < -1] = -1
+    data[data > 1] = 1
+    return inverse_scaler(data).permute(0, 2, 3, 1)
+
+
+def post_process_data(setup, batch, noisy_batch, samples):
+    samples = samples.permute(0, 2, 3, 1)
+    samples = torch.clamp(samples, min=0, max=1)
+    samples = 255 * samples
+
+    noisy_batch = convert_to_img(noisy_batch, setup.inverse_scaler)
+    noisy_batch = 255 * noisy_batch
+
+    batch = setup.inverse_scaler(batch).permute(0, 2, 3, 1)
+    batch = 255 * batch
+    return batch, noisy_batch, samples
 
 
 class Setup:

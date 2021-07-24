@@ -13,13 +13,13 @@ import numpy as np
 import tensorflow as tf
 import torch
 from absl import app, flags
-from denoise_utils import Setup, write_to_file
+from denoise_utils import Setup, dump_data, post_process_data, write_to_file
 from eval_metrics import EvalMetrics
 from ml_collections.config_flags import config_flags
 # Keep the import below for registering all model definitions
 from tqdm import tqdm
 
-from scripts.get_marginal_probablity import (convert_to_img, get_noisy_imgs_from_batch)
+from scripts.get_marginal_probablity import get_noisy_imgs_from_batch
 
 config_flags.DEFINE_config_file("config", None, "Training configuration.", lock_config=True)
 flags.DEFINE_string("workdir", None, "Work directory.")
@@ -33,30 +33,6 @@ flags.DEFINE_bool('skip_forward_integration', False, 'If True, the the forward i
 flags.mark_flags_as_required(["workdir", "config"])
 
 FLAGS = flags.FLAGS
-
-
-def dump_data(batch, noisy_batch, samples, output_dir, sampling_round):
-    samples = (samples.cpu().numpy()).astype(np.uint8)
-    batch = (batch.cpu().numpy()).astype(np.uint8)
-    noisy_batch = (noisy_batch.cpu().numpy()).astype(np.uint8)
-
-    # Write samples to disk or Google Cloud Storage
-    write_to_file(os.path.join(output_dir, f"samples_{sampling_round}.npz"), samples)
-    write_to_file(os.path.join(output_dir, f"clean_data_{sampling_round}.npz"), batch)
-    write_to_file(os.path.join(output_dir, f"noisy_data_{sampling_round}.npz"), noisy_batch)
-
-
-def post_process_data(setup, batch, noisy_batch, samples):
-    samples = samples.permute(0, 2, 3, 1)
-    samples = torch.clamp(samples, min=0, max=1)
-    samples = 255 * samples
-
-    noisy_batch = convert_to_img(noisy_batch, setup.inverse_scaler)
-    noisy_batch = 255 * noisy_batch
-
-    batch = setup.inverse_scaler(batch).permute(0, 2, 3, 1)
-    batch = 255 * batch
-    return batch, noisy_batch, samples
 
 
 def main(argv):

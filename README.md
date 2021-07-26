@@ -258,3 +258,66 @@ Performance is slightly better. And the time is reduced by almost half.
 --noise_start_t=0.1 --latent_start_t=0.1 --sampling_end_t=-0.05 --skip_forward_integration
 [EvalMetrics Recons] MSE:71.17+-7.271
 [EvalMetrics Recons] PSNR:29.63+-0.450
+
+
+### BSD68 RESULTS
+Start_T:0.1 Existing_T:0.1
+[EvalMetrics Input] MSE:2551.59+-3222.183
+[EvalMetrics Input] PSNR:16.69+-4.555
+
+latent_start_t = 0.1 sampling_end_t = 0.001
+[EvalMetrics Recons] MSE:2288.34+-3371.506
+[EvalMetrics Recons] PSNR:18.65+-5.940
+
+latent_start_t = 0.15 sampling_end_t = 0.001
+  [EvalMetrics Recons] MSE:2294.62+-3532.861
+  [EvalMetrics Recons] PSNR:19.63+-6.894
+
+  [EvalMetrics Recons] MSE:2630.93+-3284.243
+  [EvalMetrics Recons] PSNR:18.58+-6.974
+
+
+ckp2 + 50K steps:
+  latent_start_t = 0.15 sampling_end_t = 0.001
+  [EvalMetrics Input] MSE:585.72+-41.493
+  [EvalMetrics Input] PSNR:20.47+-0.340
+  [EvalMetrics Input] MSE:582.86+-45.409
+  [EvalMetrics Input] PSNR:20.49+-0.379
+
+  [EvalMetrics Recons] MSE:193.20+-52.358
+  [EvalMetrics Recons] PSNR:25.44+-1.262
+  [EvalMetrics Recons] MSE:188.76+-51.868
+  [EvalMetrics Recons] PSNR:25.54+-1.235
+
+  latent_start_t = 0.1 sampling_end_t = 0.001
+  [EvalMetrics Input] MSE:583.45+-44.365
+  [EvalMetrics Input] PSNR:20.48+-0.364
+  [EvalMetrics Recons] MSE:273.20+-32.937
+  [EvalMetrics Recons] PSNR:23.80+-0.552
+
+ckp4 + 50K steps:
+  latent_start_t = 0.1 sampling_end_t = 0.001
+  [EvalMetrics Input] MSE:585.17+-43.649
+  [EvalMetrics Input] PSNR:20.47+-0.352
+  [EvalMetrics Recons] MSE:285.61+-34.020
+  [EvalMetrics Recons] PSNR:23.61+-0.549
+
+ckp1 + 50K steps:
+  latent_start_t = 0.1 sampling_end_t = 0.001
+  [EvalMetrics Input] MSE:588.67+-38.520
+  [EvalMetrics Input] PSNR:20.44+-0.337
+  [EvalMetrics Recons] MSE:274.50+-40.160
+  [EvalMetrics Recons] PSNR:23.80+-0.730
+
+ckp1 + 500 steps:
+  latent_start_t = 0.15 sampling_end_t = 0.001
+  [EvalMetrics Input] MSE:583.64+-45.149
+  [EvalMetrics Input] PSNR:20.48+-0.374
+  [EvalMetrics Recons] MSE:212.37+-87.425
+  [EvalMetrics Recons] PSNR:25.32+-2.198
+
+  latent_start_t = 0.10 sampling_end_t = 0.001
+  [EvalMetrics Input] MSE:587.86+-38.246
+  [EvalMetrics Input] PSNR:20.45+-0.318
+  [EvalMetrics Recons] MSE:262.18+-42.261
+  [EvalMetrics Recons] PSNR:24.00+-0.696
